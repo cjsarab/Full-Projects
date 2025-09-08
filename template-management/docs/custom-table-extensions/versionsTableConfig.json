@@ -1,0 +1,200 @@
+{
+    "MEPIndicator": "N",
+    "customTableName": "xstmtvrs",
+    "customTableAPIName": "x-xstmtvrs",
+    "customTableDescription": "Templates Versions",
+    "customTableSecurityObject": "API_X_XSTMTVRS",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "requiresAutoIncrement": "N",
+    "customTableColumns": [
+        {
+            "columnName": "xstmtvrs_vers_id",
+            "attributeKeyColumn": "true",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "36",
+            "attributePrompt": "Template Version ID",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_template_id",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "36",
+            "attributePrompt": "Template ID",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_vers_number",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "numeric",
+            "attributeDataLength": "36",
+            "attributePrompt": "Template Version Number",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_status_enum",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "9",
+            "attributePrompt": "draft, published, archived",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_is_active",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "5",
+            "attributePrompt": "true, false",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_roles",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "JSON-serialized array",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_created_at",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "numeric",
+            "attributeDataLength": "13",
+            "attributePrompt": "Created At Timestamp",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_created_by",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "36",
+            "attributePrompt": "Created By Banner UUID",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_published_at",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "numeric",
+            "attributeDataLength": "13",
+            "attributePrompt": "Published At Timestamp",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_published_by",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "36",
+            "attributePrompt": "Published By Banner UUID",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_archived_at",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "numeric",
+            "attributeDataLength": "13",
+            "attributePrompt": "Archived At Timestamp",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_archived_by",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "36",
+            "attributePrompt": "Archived By Banner UUID",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_notes",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "512",
+            "attributePrompt": "Template Version Notes",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_content_1",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "Template Version HTML1",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_content_2",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "Template Version HTML2",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_content_3",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "Template Version HTML3",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_content_4",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "Template Version HTML4",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_content_5",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "Template Version HTML5",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_content_6",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "Template Version HTML6",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_content_7",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "Template Version HTML7",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtvrs_content_8",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "4000",
+            "attributePrompt": "Template Version HTML8",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        }
+    ]
+}
