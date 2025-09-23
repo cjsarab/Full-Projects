@@ -12,6 +12,8 @@ import { useDialog } from "../../contexts/DialogContext";
 import { useEditor } from "../../contexts/EditorContext";
 import { useTemplate } from "../../contexts/TemplateContext";
 
+import { pipelines } from "../../pipeline-config";
+
 const PreviewDialog = () => {
 
 
@@ -49,7 +51,7 @@ const PreviewDialog = () => {
             dialog.setWarning('')
             const res = await postPayloadToEthosPipeline({ selectedTemplate, editorValue, bannerId },
                 authenticatedEthosFetch,
-                `UWS-CREATE-PREVIEW?cardId=${cardId}&cardPrefix=${cardPrefix}`
+                `${pipelines.createPreview}?cardId=${cardId}&cardPrefix=${cardPrefix}`
             )
             setPreviewTemplate(res)
             await data.refresh()

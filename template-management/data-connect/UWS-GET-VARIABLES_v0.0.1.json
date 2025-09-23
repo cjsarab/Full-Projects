@@ -1,0 +1,32 @@
+{
+  "name": "UWS-GET-VARIABLES",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "GET"
+  },
+  "pipeline": [
+    "Get Variables"
+  ],
+  "segments": {
+    "Get Variables": {
+      "class": "ethosProxyGet",
+      "config": {
+        "resource": "x-xstmvrbl",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingVariables",
+        "apiKey": "ethosApiKey"
+      }
+    }
+  }
+}

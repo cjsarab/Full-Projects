@@ -1,0 +1,81 @@
+{
+  "name": "UWS-PUBLISH-DRAFT",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Get IDs",
+    "Save Template Title and Description",
+    "Publish Template Draft Version Content",
+    "Check for Successful Publish",
+    "Delete Draft"
+  ],
+  "segments": {
+    "Get IDs": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  const p = message.payload.payload;\n  const date = Date.now();\n  context.set('date', date)\n  const userId = context.__user?.id;\n\n  const xstmtmplId = p.editableTemplate.id;\n  const xstmtvrsId = p.workingTemplateVersion.id;\n  \n  if (!xstmtmplId || !userId || !xstmtvrsId) {\n    throw new Error(\"Something went wrong. Please try again.\");\n  };\n  \n  // Set published\n  message.payload.payload.workingTemplateVersion.xstmtvrsStatusEnum = 'published';\n  message.payload.payload.workingTemplateVersion.xstmtvrsPublishedAt = context.get('date');\n  message.payload.payload.workingTemplateVersion.xstmtvrsPublishedBy = userId;\n  \n  context.xstmtmplId = xstmtmplId;\n  context.xstmtvrsId = xstmtvrsId;\n  return message;\n}\n"
+      }
+    },
+    "Save Template Title and Description": {
+      "class": "ethosProxyPut",
+      "config": {
+        "resource": "x-xstmtmpl",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "idFromContext": "xstmtmplId",
+        "target": "__saveTemplate",
+        "bodyPath": "payload.editableTemplate",
+        "ignoreErrors": false,
+        "errorPath": "__errorSaveTemplate",
+        "apiKey": "ethosApiKey",
+        "allowConcurrent": false
+      }
+    },
+    "Publish Template Draft Version Content": {
+      "class": "ethosProxyPost",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "target": "__publishTemplateVersion",
+        "bodyPath": "payload.workingTemplateVersion",
+        "ignoreErrors": false,
+        "errorPath": "__errorPublishTemplateVersion",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Check for Successful Publish": {
+      "class": "JavaScriptTransform",
+      "description": "Delete draft if successful",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  let publishedSuccessfully = false;\n  \n  // __errorPublishTemplateVersion\n  \n  if (message.payload.__publishTemplateVersion) {\n    publishedSuccessfully = true;\n  }\n  \n  message.payload.__publishedSuccessfully = publishedSuccessfully;\n  return message;\n}\n"
+      }
+    },
+    "Delete Draft": {
+      "class": "ethosProxyDelete",
+      "if": "message.payload.__publishedSuccessfully",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "idFromContext": "xstmtvrsId",
+        "ignoreErrors": false,
+        "errorPath": "__errorDeletingDraft",
+        "apiKey": "ethosApiKey"
+      }
+    }
+  }
+}

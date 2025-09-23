@@ -10,6 +10,8 @@ import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
 import { postPayloadToEthosPipeline } from "../../services";
 
+import { pipelines } from "../../pipeline-config";
+
 
 const NewDraftDialog = () => {
 
@@ -47,7 +49,7 @@ const NewDraftDialog = () => {
                 selectedTemplateVersions
             },
                 authenticatedEthosFetch,
-                `UWS-CREATE-NEW-DRAFT?cardId=${cardId}&cardPrefix=${cardPrefix}`
+                `${pipelines.createNewDraft}?cardId=${cardId}&cardPrefix=${cardPrefix}`
             )
             await data.refresh()
             handleSelectTemplate(selectedTemplate)

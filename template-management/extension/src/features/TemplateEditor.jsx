@@ -9,14 +9,14 @@ import PublishedEditorScreen from './PublishedEditorScreen'
 
 import { useTemplate } from '../contexts/TemplateContext';
 
+import { pipelines } from '../pipeline-config';
+
 const TemplateEditor = () => {
 
     const [publisherName, setPublisherName] = useState('');
     const [publisherBannerId, setPublisherBannerId] = useState('');
     const [creatorName, setCreatorName] = useState('');
     const [creatorBannerId, setCreatorBannerId] = useState('');
-    // const [archiverName, setArchiverName] = useState('');
-    // const [archiverBannerId, setArchiverBannerId] = useState('');
 
     const { authenticatedEthosFetch } = useData();
     const { cardId, cardPrefix } = useCardInfo();
@@ -36,13 +36,12 @@ const TemplateEditor = () => {
                     "xstmtvrsArchivedBy": archiverId || ""
                 },
                     authenticatedEthosFetch,
-                    `UWS-GET-AUTHOR-METADATA?cardId=${cardId}&cardPrefix=${cardPrefix}`);
+                    `${pipelines.getAuthorMetadata}?cardId=${cardId}&cardPrefix=${cardPrefix}`);
                 setCreatorName(result?.__createdBy?.fullName);
                 setCreatorBannerId(result?.__createdBy?.bannerId);
                 setPublisherName(result?.__publishedBy?.fullName);
                 setPublisherBannerId(result?.__publishedBy?.bannerId);
-                //   setArchiverName(result?.archivedBy?.fullName);
-                //   setArchiverBannerId(result?.archivedBy?.bannerId);
+
             } catch (err) {
                 console.error('Failed to fetch publisher:', err);
                 setPublisherName('Unknown');

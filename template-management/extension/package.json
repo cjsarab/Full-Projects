@@ -1,6 +1,6 @@
 {
     "name": "template-management",
-    "version": "1.0.13",
+    "version": "1.0.15",
     "description": "Allows administrative staff to manage templates for various letters and allows students to download them.",
     "main": "index.js",
     "license": "MIT",

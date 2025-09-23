@@ -7,6 +7,8 @@ import { getFromEthosPipeline } from '../services';
 
 import { useDialog } from './DialogContext';
 
+import { pipelines } from '../pipeline-config';
+
 
 const TemplateContext = createContext();
 
@@ -46,7 +48,7 @@ const TemplateProviderInner = ({ children }) => {
             try {
                 const response = await getFromEthosPipeline(
                     authenticatedEthosFetch,
-                    `UWS-GET-TEMPLATE-VERSIONS?xstmtvrsTemplateId=${templateId}&cardId=${cardId}&cardPrefix=${cardPrefix}`
+                    `${pipelines.getTemplateVersions}?xstmtvrsTemplateId=${templateId}&cardId=${cardId}&cardPrefix=${cardPrefix}`
                 );
                 setSelectedTemplateVersions(response);
                 setLoadingStatus(false);
@@ -109,7 +111,7 @@ const TemplateProviderInner = ({ children }) => {
             isLoading,
             isRefreshing,
             refresh,
-        } = useDataQuery({ resource: 'UWS-GET-TEMPLATES' });
+        } = useDataQuery({ resource: pipelines.getTemplates });
 
         return {
             templates: data || [],
@@ -135,7 +137,7 @@ const TemplateProviderInner = ({ children }) => {
 
 export const TemplateProvider = ({ children }) => {
     const options = {
-        resource: 'UWS-GET-TEMPLATES',
+        resource: pipelines.getTemplates,
         queryFunction: userTokenDataConnectQuery,
         queryParameters: {
             accept: 'application/json'

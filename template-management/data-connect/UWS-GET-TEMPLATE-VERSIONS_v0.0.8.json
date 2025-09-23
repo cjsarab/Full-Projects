@@ -1,0 +1,49 @@
+{
+  "name": "UWS-GET-TEMPLATE-VERSIONS",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    },
+    {
+      "name": "xstmtvrsTemplateId",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "GET"
+  },
+  "pipeline": [
+    "Get Template Versions by Template ID",
+    "Filter versions"
+  ],
+  "segments": {
+    "Get Template Versions by Template ID": {
+      "class": "ethosProxyGetFilter",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "filter": "?criteria={\"xstmtvrsTemplateId\":{{context.xstmtvrsTemplateId}}}",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Filter versions": {
+      "class": "JavaScriptTransform",
+      "description": "Remove archived versions",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n\n  message.payload = message.payload.filter(\n    v => \n      v.xstmtvrsStatusEnum === \"draft\" || \n      v.xstmtvrsStatusEnum === \"published\"\n  );\n\n  return message;\n}\n"
+      }
+    }
+  }
+}

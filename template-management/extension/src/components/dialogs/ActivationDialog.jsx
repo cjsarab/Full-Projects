@@ -11,6 +11,8 @@ import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
 import { postPayloadToEthosPipeline } from "../../services";
 
+import { pipelines } from "../../pipeline-config";
+
 const ActivationDialog = () => {
 
     const { authenticatedEthosFetch } = useData();
@@ -38,7 +40,7 @@ const ActivationDialog = () => {
         if (workingTemplateVersion?.xstmtvrsIsActive === "true") {
             try {
                 await postPayloadToEthosPipeline({ workingTemplateVersion }, authenticatedEthosFetch,
-                    `UWS-DEACTIVATE-TEMPLATE?cardId=${cardId}&cardPrefix=${cardPrefix}`)
+                    `${pipelines.deactivateTemplate}?cardId=${cardId}&cardPrefix=${cardPrefix}`)
                 await data.refresh()
                 await handleSelectTemplate(selectedTemplate)
                 dialog.setIsLoading(false)
@@ -51,7 +53,7 @@ const ActivationDialog = () => {
             try {
                 const templateId = workingTemplateVersion.xstmtvrsTemplateId;
                 await postPayloadToEthosPipeline({ workingTemplateVersion }, authenticatedEthosFetch,
-                    `UWS-ACTIVATE-TEMPLATE?xstmtvrsTemplateId=${templateId}&cardId=${cardId}&cardPrefix=${cardPrefix}`)
+                    `${pipelines.activateTemplate}?xstmtvrsTemplateId=${templateId}&cardId=${cardId}&cardPrefix=${cardPrefix}`)
                 await data.refresh()
                 await handleSelectTemplate(selectedTemplate)
                 dialog.setIsLoading(false)

@@ -2,8 +2,7 @@ import React, { createContext, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { DataQueryProvider, userTokenDataConnectQuery, useDataQuery } from '@ellucian/experience-extension-extras';
 
-// import { useCardInfo, useData } from '@ellucian/experience-extension-utils';
-// import { getFromEthosPipeline } from '../services';
+import { pipelines } from '../pipeline-config';
 
 
 const VariableContext = createContext();
@@ -18,9 +17,6 @@ export const useVariable = () => {
 
 const VariableProviderInner = ({ children }) => {
 
-    // const { authenticatedEthosFetch } = useData();
-    // const { cardId, cardPrefix } = useCardInfo();
-
     const useVariableData = () => {
         const {
             data,
@@ -28,7 +24,7 @@ const VariableProviderInner = ({ children }) => {
             isLoading,
             isRefreshing,
             refresh,
-        } = useDataQuery({ resource: 'UWS-GET-VARIABLES' });
+        } = useDataQuery({ resource: pipelines.getVariables });
 
         return {
             variables: data || [],
@@ -50,7 +46,7 @@ const VariableProviderInner = ({ children }) => {
 
 export const VariableProvider = ({ children }) => {
     const options = {
-        resource: 'UWS-GET-VARIABLES',
+        resource: pipelines.getVariables,
         queryFunction: userTokenDataConnectQuery,
         queryParameters: {
             accept: 'application/json'

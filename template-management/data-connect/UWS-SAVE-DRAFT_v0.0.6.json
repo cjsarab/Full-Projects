@@ -1,0 +1,59 @@
+{
+  "name": "UWS-SAVE-DRAFT",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Get IDs",
+    "Save Template Title and Description",
+    "Save Template Draft Version Content"
+  ],
+  "segments": {
+    "Get IDs": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  // message.payload.payload.workingTemplateVersion.xstmtvrsStatusEnum = 'published';\n  \n  const xstmtmplId = message.payload.payload.editableTemplate.id;\n  const xstmtvrsId = message.payload.payload.workingTemplateVersion.id;\n  \n  context.xstmtmplId = xstmtmplId;\n  context.xstmtvrsId = xstmtvrsId;\n  return message;\n}\n"
+      }
+    },
+    "Save Template Title and Description": {
+      "class": "ethosProxyPut",
+      "config": {
+        "resource": "x-xstmtmpl",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "idFromContext": "xstmtmplId",
+        "target": "__saveTemplate",
+        "bodyPath": "payload.editableTemplate",
+        "ignoreErrors": false,
+        "errorPath": "__errorSaveTemplate",
+        "apiKey": "ethosApiKey",
+        "allowConcurrent": false
+      }
+    },
+    "Save Template Draft Version Content": {
+      "class": "ethosProxyPut",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "idFromContext": "xstmtvrsId",
+        "target": "__saveTemplateVersion",
+        "bodyPath": "payload.workingTemplateVersion",
+        "ignoreErrors": false,
+        "errorPath": "__errorSaveTemplateDraft",
+        "apiKey": "ethosApiKey",
+        "allowConcurrent": false
+      }
+    }
+  }
+}

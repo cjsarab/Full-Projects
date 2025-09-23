@@ -11,6 +11,8 @@ import { useDataQuery } from '@ellucian/experience-extension-extras';
 import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
 
+import { pipelines } from "../../pipeline-config";
+
 const NewTemplateDialog = () => {
 
     const { authenticatedEthosFetch } = useData();
@@ -18,7 +20,7 @@ const NewTemplateDialog = () => {
     const { newTemplateDialog: dialog } = useDialog();
     const { selection: { handleSelectTemplate } } = useTemplate();
 
-    const { refresh: refreshTemplatesData } = useDataQuery({ resource: 'UWS-GET-TEMPLATES' });
+    const { refresh: refreshTemplatesData } = useDataQuery({ resource: pipelines.getTemplates });
 
     const handleDialogAccept = async () => {
         const title = dialog.inputs.title.trim() || "";
@@ -75,7 +77,7 @@ const NewTemplateDialog = () => {
                     "xstmtvrsContent1": sampleHtml
                 },
                 authenticatedEthosFetch,
-                `UWS-CREATE-NEW-TEMPLATE?cardId=${cardId}&cardPrefix=${cardPrefix}`);
+                `${pipelines.createNewTemplate}?cardId=${cardId}&cardPrefix=${cardPrefix}`);
             await refreshTemplatesData();
             handleSelectTemplate(res?.__newTemplateResponse);
             dialog.setShow(false);

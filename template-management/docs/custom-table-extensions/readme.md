@@ -108,4 +108,4 @@ Creating a new record in this table will populate the variable dropdown in the t
 
  <img src="../assets/toolbar_variable_dropdown.png">
 
- The logic to extract the variable should be
+Each variable must be populated by submitting a similar JSON body and then the logic to determine the variable should be included in both the CREATE-PREVIEW and DOWNLOAD-LETTER pipelines by adding to the master variable map object in the assign variables fitting. Any additional API calls should be performed before this fitting and their response object assigned to a new mesage.payload.__response for the map to read from.

@@ -21,6 +21,8 @@ import CustomButton from '../../components/Button';
 import CustomSnackbar from "../../components/Snackbar";
 import CustomEditor from '../../components/CustomEditor';
 
+import { pipelines } from '../../pipeline-config';
+
 
 const DraftEditorScreen = ({
     creatorName,
@@ -77,7 +79,7 @@ const DraftEditorScreen = ({
                     editableTemplate
                 },
                 authenticatedEthosFetch,
-                `UWS-SAVE-DRAFT?cardId=${cardId}&cardPrefix=${cardPrefix}`
+                `${pipelines.saveDraft}?cardId=${cardId}&cardPrefix=${cardPrefix}`
             )
             setSaveSuccessMessage(`Successfully saved draft '${editableTemplate?.xstmtmplTemplateTitle || 'Untitled'}'.`);
 
@@ -99,7 +101,7 @@ const DraftEditorScreen = ({
                     editableTemplate
                 },
                 authenticatedEthosFetch,
-                `UWS-PUBLISH-DRAFT?cardId=${cardId}&cardPrefix=${cardPrefix}`
+                `${pipelines.publishDraft}?cardId=${cardId}&cardPrefix=${cardPrefix}`
             )
             setSaveSuccessMessage(`Successfully published draft '${editableTemplate?.xstmtmplTemplateTitle || 'Untitled'}'.`);
 

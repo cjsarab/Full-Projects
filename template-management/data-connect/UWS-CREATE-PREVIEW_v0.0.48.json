@@ -1,0 +1,215 @@
+{
+  "name": "UWS-CREATE-PREVIEW",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Extract Criteria and Prepare for API Calls",
+    "Get Current Term Code",
+    "Get current academic period from Term Code",
+    "Add academicPeriod to context",
+    "Get person by Banner ID",
+    "Add persons ID to context",
+    "student-academic-periods",
+    "student-academic-period-statuses",
+    "general-student-curricula",
+    "student-academic-programs",
+    "additional-student-information-attribute",
+    "Assign variables",
+    "Replace variables in HTML",
+    "View Context (DEBUG)"
+  ],
+  "segments": {
+    "Extract Criteria and Prepare for API Calls": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  \n  const html = message.payload.payload.editorValue;\n  const bannerId = message.payload.payload.bannerId;\n  const selectedTemplate = message.payload.payload.selectedTemplate;\n  context.set('html', html);\n  context.set('bannerId', bannerId);\n  context.set('selectedTemplate', selectedTemplate);\n  \n  // Match all data-variable=\"...\" in <variable> tags\n  const regex = /<variable[^>]*data-variable=\"([^\"]+)\"[^>]*>/g;\n  const variables = [];\n  let match;\n\n  // Extract all variable names\n  while ((match = regex.exec(html)) !== null) {\n    const varName = match[1];\n    variables.push({ name: varName, value: \"\" });\n  }\n  \n  const apiCallPlan = {};\n  variables.forEach(obj => {\n    const key = obj.name;\n    apiCallPlan[key] = true;\n  });\n  \n  message.payload.__variables = variables;\n\n  // Store in context for later use\n  context.set('variables', variables)\n  context.set('apiCallPlan', apiCallPlan)\n\n   \n  return message;\n}\n"
+      }
+    },
+    "Get Current Term Code": {
+      "class": "ethosProxyGetFilter",
+      "config": {
+        "resource": "eu-system-parameter-maintenance",
+        "filter": "?gkvksysCode=UCAS&paramName=CURRENT TERM CODE",
+        "payloadTargetPath": "__termCode",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingTermCode",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Get current academic period from Term Code": {
+      "class": "ethosProxyGetFilter",
+      "config": {
+        "resource": "academic-periods",
+        "filter": "?criteria={\"code\":\"{{message.payload.__termCode.0.value}}\"}",
+        "payloadTargetPath": "__currentAcademicPeriod",
+        "acceptVersions": [
+          "16"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingCurrentAcademicPeriod",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Add academicPeriod to context": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  \n  context.set('currentAcademicPeriod', message.payload.__currentAcademicPeriod)\n  return message;\n}\n"
+      }
+    },
+    "Get person by Banner ID": {
+      "class": "ethosProxyGetFilter",
+      "config": {
+        "resource": "persons",
+        "filter": "?criteria={\"credentials\":[{\"type\":\"bannerId\",\"value\":\"{{context.bannerId}}\"}]}",
+        "payloadTargetPath": "__person",
+        "acceptVersions": [
+          "12"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Add persons ID to context": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  context.set('personId', message.payload.__person[0].id);\n  return message;\n}\n"
+      }
+    },
+    "student-academic-periods": {
+      "class": "ethosProxyGetFilter",
+      "if": "context.apiCallPlan.ENROLLMENT_STATUS",
+      "config": {
+        "resource": "student-academic-periods",
+        "filter": "?criteria={\"person\": {\"id\": \"{{context.personId}}\"},\"academicPeriod\": {\"id\": \"{{context.currentAcademicPeriod.0.id}}\"}}",
+        "payloadTargetPath": "__studentAcademicPeriods",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorStudentAcademicPeriods",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "student-academic-period-statuses": {
+      "class": "ethosProxyGetArray",
+      "if": "context.apiCallPlan.ENROLLMENT_STATUS",
+      "config": {
+        "resource": "student-academic-period-statuses",
+        "acceptVersions": [
+          "1"
+        ],
+        "idFromPayload": "$.__studentAcademicPeriods[*].academicStatuses[*].academicPeriodStatus.id",
+        "jsonPathTarget": "$.__studentAcademicPeriods[*].academicStatuses[*].academicPeriodStatus",
+        "cache": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingEnrollmentStatus",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "general-student-curricula": {
+      "class": "ethosProxyGetFilter",
+      "config": {
+        "resource": "general-student-curricula",
+        "filter": "?criteria={\"id\":\"{{context.bannerId}}\",\"criteria.sorlcurCactCode\":\"ACTIVE\",\"criteria.sorlcurCurrentInd\":\"Y\" }",
+        "payloadTargetPath": "__generalStudentCurricula",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingGeneralStudentCurricula",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "student-academic-programs": {
+      "class": "ethosProxyGetFilter",
+      "if": "context.apiCallPlan.START_DATE",
+      "config": {
+        "resource": "student-academic-programs",
+        "filter": "?criteria={\"student\": {\"id\": \"{{context.personId}}\"},\"enrollmentStatus\": {\"status\": \"active\"},\"curriculumObjective\": \"matriculated\"}",
+        "payloadTargetPath": "__studentAcademicPrograms",
+        "acceptVersions": [
+          "16"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingStudentAcademicPrograms",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "additional-student-information-attribute": {
+      "class": "ethosProxyGetFilter",
+      "if": "context.apiCallPlan.FT_PT_STATUS",
+      "config": {
+        "resource": "additional-student-information-attribute",
+        "filter": "?criteria={\"sgastdnId\":\"{{context.bannerId}}\",\"sgastdnTermCodeEff\": \"{{context.currentAcademicPeriod.0.code}}\" }",
+        "payloadTargetPath": "__additionalStudentInformationAttribute",
+        "acceptVersions": [
+          "1.0.0"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Assign variables": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  \n  const person = message.payload.__person[0];\n  const name = person.names.find(n => n.preference === 'preferred');\n  \n  const enrollmentStatus = message.payload.__studentAcademicPeriods?.[0]?.academicStatuses?.[0]?.academicPeriodStatus?.title || \"\";\n  const generalStudentCurricula = message.payload.__generalStudentCurricula || [];\n  const studentAcademicPrograms = message.payload.__studentAcademicPrograms || [];\n  const aSIA = message.payload.__additionalStudentInformationAttribute || [];\n  \n  const attr = aSIA?.[0]?.SGRSATT?.find(a => a.attsCode === \"MFT\" || a.attsCode === \"MPT\");\n  \n  const ftPtStatus = attr\n    ? (attr.attsCode === \"MFT\" ? \"Full Time\" : \"Part Time\")\n    : null;\n\n\n  \n  // Put variable paths etc here\n  const masterVariableMap = {\n    \"DATE_OF_BIRTH\": person.dateOfBirth,\n    \"BANNER_ID\": person.credentials.find(c => c.type === 'bannerId')?.value,\n    \"TITLE\": name?.title,\n    \"FIRST_NAME\": name?.firstName,\n    \"MIDDLE_NAME\": name?.middleName,\n    \"LAST_NAME\": name?.lastName,\n    \"ENROLLMENT_STATUS\": enrollmentStatus,\n    \"ADMIT_TERM_CODE\": generalStudentCurricula?.[0]?.admtTermDesc,\n    \"CAMPUS_CODE\": generalStudentCurricula?.[0]?.campCode,\n    \"CAMPUS_DESC\": generalStudentCurricula?.[0]?.campDesc,\n    \"START_DATE\": studentAcademicPrograms?.[0]?.startOn,\n    \"END_DATE\": studentAcademicPrograms?.[0]?.endOn,\n    \"PROGRAM_CODE\": generalStudentCurricula?.[0]?.program,\n    \"PROGRAM_DESC\": generalStudentCurricula?.[0]?.programDesc,\n    \"MAJOR_CODE\": generalStudentCurricula?.[0]?.degcCode,\n    \"MAJOR_DESC\": generalStudentCurricula?.[0]?.degcDesc,\n    \"LEVEL_CODE\": generalStudentCurricula?.[0]?.levlCode,\n    \"LEVEL_DESC\": generalStudentCurricula?.[0]?.levlDesc,\n    \"TRIMESTER_ENTRY_CODE\": generalStudentCurricula?.[0]?.stypCode,\n    \"TRIMESTER_ENTRY_DESC\": generalStudentCurricula?.[0]?.stypCodeDesc,\n    \"FT_PT_STATUS\": ftPtStatus\n    \n  }\n  \n  const variables = message.payload.__variables;\n  const data = message.payload.__persons?.[0];\n  \n  variables.forEach(v => {\n    const key = v.name;\n    v.value = masterVariableMap[key] || \"\";\n  });\n  \n  message.payload.__variables = variables;\n  \n  context.set('working', 'working?')\n  context.set('variables', variables)\n  return message;\n}\n"
+      }
+    },
+    "Replace variables in HTML": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  let html = context.get('html'); \n  \n  const variables = message.payload.__variables;\n  \n  variables.forEach(v => {\n    const pattern = new RegExp(`<variable[^>]*data-variable=\"${v.name}\"[^>]*>.*?</variable>`, 'g');\n    html = html.replace(pattern, v.value);\n  });\n  \n  message.payload.__renderedHtml = html;\n  message.payload.__selectedTemplateTitle = context.get('selectedTemplate').xstmtmplTemplateTitle;\n  \n  \n  return message;\n}\n"
+      }
+    },
+    "View Context (DEBUG)": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n    message.payload.__context = context;\n\n  return message;\n}\n"
+      }
+    }
+  }
+}

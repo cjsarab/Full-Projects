@@ -10,6 +10,8 @@ import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
 import { postPayloadToEthosPipeline } from "../../services";
 
+import { pipelines } from "../../pipeline-config";
+
 
 const DeleteDialog = () => {
 
@@ -45,7 +47,7 @@ const DeleteDialog = () => {
                 selectedTemplateVersion: selectedTemplateVersions.find(v => v.xstmtvrsStatusEnum === 'draft')
             },
                 authenticatedEthosFetch,
-                `UWS-DELETE-DRAFT?cardId=${cardId}&cardPrefix=${cardPrefix}`
+                `${pipelines.deleteDraft}?cardId=${cardId}&cardPrefix=${cardPrefix}`
             )
             await data.refresh()
             handleSelectTemplate(null)

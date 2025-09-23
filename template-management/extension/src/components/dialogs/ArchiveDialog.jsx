@@ -10,6 +10,8 @@ import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
 import { postPayloadToEthosPipeline } from "../../services";
 
+import { pipelines } from "../../pipeline-config";
+
 
 const ArchiveDialog = () => {
 
@@ -48,7 +50,7 @@ const ArchiveDialog = () => {
                 workingTemplateVersion
             },
                 authenticatedEthosFetch,
-                `UWS-ARCHIVE-TEMPLATE-VERSION?cardId=${cardId}&cardPrefix=${cardPrefix}`
+                `${pipelines.archiveTemplateVersion}?cardId=${cardId}&cardPrefix=${cardPrefix}`
             )
             await data.refresh()
             setWorkingTemplateVersion(null)

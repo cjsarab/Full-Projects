@@ -1,7 +1,10 @@
 import React from 'react';
-import { Box, Divider, List, ListItemButton, ListItemText, Typography, Skeleton } from '@mui/material';
+import { Skeleton } from '@mui/material';
+import { Box, Divider, List, ListItemButton, ListItem, ListItemIcon, ListItemText, Typography } from '@ellucian/react-design-system/core';
 import AddIcon from '@mui/icons-material/Add';
+import { Icon } from '@ellucian/ds-icons/lib';
 import CustomButton from '../components/Button';
+
 
 import { useTemplate } from '../contexts/TemplateContext';
 import { useDialog } from '../contexts/DialogContext';
@@ -29,8 +32,8 @@ const TemplateSelector = () => {
         <>
             <Box sx={{ width: '100%' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Typography variant="h6">Templates</Typography>
-                    <CustomButton label="New" color="info" variant="outlined"
+                    <Typography variant="h3">Templates</Typography>
+                    <CustomButton label="New" color='info' variant="outlined"
                         onClick={() => newTemplateDialog.handleOpen()}
                         startIcon={<AddIcon />}
                     />
@@ -44,13 +47,18 @@ const TemplateSelector = () => {
                 }
                 <List sx={{ mt: 1, overflowY: 'auto', maxHeight: 'calc(100vh - 240px)' }}>
                     {data.templates.map((template) => (
-                        <ListItemButton
-                            key={template.id}
-                            selected={selection.selectedTemplate?.id === template.id}
-                            onClick={() => selection.handleSelectTemplate(template)}
-                        >
-                            <ListItemText primary={template.xstmtmplTemplateTitle} />
-                        </ListItemButton>
+                        <ListItem key={template.id}>
+                            <ListItemIcon>
+                                <Icon name="file-text" large />
+                            </ListItemIcon>
+                            <ListItemButton
+                                selected={selection.selectedTemplate?.id === template.id}
+                                onClick={() => selection.handleSelectTemplate(template)}
+                            >
+
+                                <ListItemText primary={template.xstmtmplTemplateTitle} />
+                            </ListItemButton>
+                        </ListItem>
                     ))}
                 </List>
             </Box>

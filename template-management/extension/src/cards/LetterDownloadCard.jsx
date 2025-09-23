@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
 import { DataQueryProvider, useDataQuery, userTokenDataConnectQuery } from '@ellucian/experience-extension-extras';
-import { Typography, Card, CardContent, List, ListItem, CircularProgress, Box } from '@mui/material';
-import CloudDownloadOutlinedIcon from '@mui/icons-material/CloudDownloadOutlined';
-import { postPayloadToEthosPipeline } from '../services';
+import { Typography, List, ListItem, ListItemIcon, CircularProgress, Box, IconButton, ListItemText } from '@ellucian/react-design-system/core';
+import { Download, Icon } from '@ellucian/ds-icons/lib';
 import { useCardInfo, useData } from '@ellucian/experience-extension-utils';
+import { postPayloadToEthosPipeline } from '../services';
 import { handlePdfGeneration } from '../helpers';
-import IconButton from '@mui/material/IconButton';
+import { pipelines } from '../pipeline-config';
 
 
 function LetterDownloadCard() {
-    const {
-        data,
-        dataError,
-        isLoading,
-    } = useDataQuery({ resource: 'UWS-GET-ACTIVE-TEMPLATES' });
+    const { data, dataError, isLoading } = useDataQuery({ resource: pipelines.getActiveTemplates });
 
     const { authenticatedEthosFetch } = useData();
     const { cardId, cardPrefix } = useCardInfo();
@@ -29,17 +25,16 @@ function LetterDownloadCard() {
         const templateId = getTemplateId(template)
         setDownloadingTemplates(prev => new Set([...prev, templateId]));
 
-        const templateVersionId = template.xstmtvrsVersId
+        const templateVersionId = template?.xstmtvrsVersId
 
         try {
             const res = await postPayloadToEthosPipeline({
                 templateVersionId
             },
                 authenticatedEthosFetch,
-                `UWS-DOWNLOAD-LETTER?cardId=${cardId}&cardPrefix=${cardPrefix}`
+                `${pipelines.downloadLetter}?cardId=${cardId}&cardPrefix=${cardPrefix}`
             );
             handlePdfGeneration(res, template)
-
         } catch (error) {
             console.error('Error downloading the document:', error);
         } finally {
@@ -67,99 +62,46 @@ function LetterDownloadCard() {
         );
     }
 
-    // return (
-    //     <Card variant="outlined">
-    //         <CardContent>
-    //             <Typography variant="h6" gutterBottom>
-    //                 Available Templates
-    //             </Typography>
-    //             {data && data.length > 0 ? (
-    //                 <List>
-    //                     {data.map((template, index) => {
-    //                         const templateId = getTemplateId(template);
-    //                         const isDownloading = downloadingTemplates.has(templateId);
-
-    //                         return (
-    //                             <ListItem
-    //                                 key={templateId || index}
-    //                                 secondaryAction={
-    //                                     <CustomButton
-    //                                         label=""
-    //                                         color="info"
-    //                                         variant="contained"
-    //                                         isLoading={isDownloading}
-    //                                         disabled={isDownloading}
-    //                                         onClick={() => handleDownloadClicked(template)}
-    //                                         endIcon={<CloudDownloadOutlinedIcon />}
-    //                                     />
-    //                                 }
-    //                             >
-    //                                 <ListItemText
-    //                                     primary={template.__templateDetails[0]?.xstmtmplTemplateTitle}
-    //                                 />
-    //                             </ListItem>
-    //                         );
-    //                     })}
-    //                 </List>
-    //             ) : (
-    //                 <Typography>No templates available.</Typography>
-    //             )}
-    //         </CardContent>
-    //     </Card>
-    // );
     return (
-        <Card variant="outlined">
-            <CardContent>
-                <Typography variant="h6" gutterBottom>
-                    Available Templates
-                </Typography>
-                {data && data.length > 0 ? (
-                    <List>
-                        {data.map((template, index) => {
-                            const templateId = getTemplateId(template);
-                            const isDownloading = downloadingTemplates.has(templateId);
+        <Box p={4}>
+            {data && data.length > 0 ? (
+                <List>
+                    {data.map((template) => {
+                        const templateId = getTemplateId(template);
+                        const isDownloading = downloadingTemplates.has(templateId);
 
-                            return (
-                                <ListItem key={templateId || index}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                        <Typography
-                                            variant="body1"
-                                            sx={{ flexGrow: 1, whiteSpace: 'normal', wordBreak: 'break-word', pr: 2 }}
-                                        >
-                                            {template.__templateDetails[0]?.xstmtmplTemplateTitle}
-                                        </Typography>
-                                    </Box>
-                                    <IconButton
-                                        color="primary"
-                                        onClick={() => handleDownloadClicked(template)}
-                                        disabled={isDownloading}
-                                        sx={{
-                                            border: '1px solid',
-                                            borderColor: 'divider',
-                                            borderRadius: 2,
-                                            backgroundColor: '#efefef',
-                                            width: 40,
-                                            height: 40,
-                                        }}
-                                    >
-                                        {isDownloading ? <CircularProgress size={20} /> : <CloudDownloadOutlinedIcon />}
-                                    </IconButton>
-                                </ListItem>
-                            );
-                        })}
-                    </List>
-                ) : (
-                    <Typography>No templates available.</Typography>
-                )}
-            </CardContent>
-        </Card>
+                        return (
+                            <ListItem key={templateId}>
+                                <ListItemIcon>
+                                    <Icon
+                                        name="file-text"
+                                        large
+                                    />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary={template.__templateDetails[0]?.xstmtmplTemplateTitle}
+                                />
+                                <IconButton color="primary"
+                                    onClick={() => handleDownloadClicked(template)}
+                                    disabled={isDownloading}
+                                >
+                                    {isDownloading ? <CircularProgress size={20} /> : <Download />}
+                                </IconButton>
+                            </ListItem>
+                        );
+                    })}
+                </List>
+            ) : (
+                <Typography>No templates available.</Typography>
+            )}
+        </Box>
     );
 }
 
 function LetterDownloadCardWithProvider() {
     const options = {
         queryFunction: userTokenDataConnectQuery,
-        resource: 'UWS-GET-ACTIVE-TEMPLATES',
+        resource: pipelines.getActiveTemplates,
         queryParameters: {
             accept: 'application/json'
         }
