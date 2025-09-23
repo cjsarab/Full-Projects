@@ -1,0 +1,95 @@
+{
+  "name": "UWS-DELETE-DRAFT",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Store Template and Versions IDs",
+    "Get Template",
+    "Get all Template Versions",
+    "Check for any published version",
+    "Delete draft template version",
+    "Delete Template if no published version exists"
+  ],
+  "segments": {
+    "Store Template and Versions IDs": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": true,
+        "draft": false,
+        "code": "function transform (message, context) {\n  \n  const p = message.payload.payload;\n  \n  if (p.selectedTemplateVersion.xstmtvrsStatusEnum != \"draft\") {\n    throw new Error(\"Only draft templates may be deleted.\")\n  }\n  \n  if (\n    !p.selectedTemplate.xstmtmplTemplateId ||\n    !p.selectedTemplate.id ||\n    !p.selectedTemplateVersion.xstmtvrsVersId ||\n    !p.selectedTemplateVersion.id\n  ) {\n    throw new Error(\"An unexpected error occurred.\")\n  }\n  // Put your code here.\n  context.set('xstmtmplTemplateId', p.selectedTemplate.xstmtmplTemplateId)\n  context.set('templateId', p.selectedTemplate.id)\n  \n  context.set('xstmtvrsVersId', p.selectedTemplateVersion.xstmtvrsVersId)\n  context.set('templateVersionId', p.selectedTemplateVersion.id )\n  \n  message.payload.__context = context;\n  return message;\n}\n"
+      }
+    },
+    "Get Template": {
+      "class": "ethosProxyGet",
+      "config": {
+        "resource": "x-xstmtmpl",
+        "acceptVersions": [
+          "1"
+        ],
+        "idFromContext": "templateId",
+        "cache": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingTemplate",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Get all Template Versions": {
+      "class": "ethosProxyGetFilter",
+      "description": "Get versions for specific template",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "filter": "?criteria={\"xstmtvrsTemplateId\":{{context.xstmtmplTemplateId}}}",
+        "payloadTargetPath": "__templateVersions",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingTemplateVersions",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Check for any published version": {
+      "class": "JavaScriptTransform",
+      "description": "If no version published delete entire template",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  const noPublishedVersion = !message.payload.__templateVersions.some(v => v.xstmtvrsStatusEnum === 'published')\n  \n  context.set('noPublishedVersion', noPublishedVersion)\n\n  message.payload.__context = context;\n  \n  return message;\n}\n"
+      }
+    },
+    "Delete draft template version": {
+      "class": "ethosProxyDelete",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "idFromContext": "templateVersionId",
+        "ignoreErrors": false,
+        "errorPath": "__errorDeletingTemplateVersion",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Delete Template if no published version exists": {
+      "class": "ethosProxyDelete",
+      "if": "context.noPublishedVersion",
+      "config": {
+        "resource": "x-xstmtmpl",
+        "idFromContext": "templateId",
+        "ignoreErrors": false,
+        "errorPath": "__errorDeletingTemplate",
+        "apiKey": "ethosApiKey"
+      }
+    }
+  }
+}

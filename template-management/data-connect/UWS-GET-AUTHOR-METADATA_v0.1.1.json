@@ -1,0 +1,89 @@
+{
+  "name": "UWS-GET-AUTHOR-METADATA",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Set boolean values",
+    "Get Creator",
+    "Get Publisher",
+    "Get Archiver",
+    "Return name and Banner ID only"
+  ],
+  "segments": {
+    "Set boolean values": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  \n  const p = message.payload.payload;\n  p.hasCreator = !!p.xstmtvrsCreatedBy;\n  p.hasPublisher = !!p.xstmtvrsPublishedBy;\n  p.hasArchiver = !!p.xstmtvrsArchivedBy;\n  message.payload = p;\n  return message;\n}\n"
+      }
+    },
+    "Get Creator": {
+      "class": "ethosProxyGet",
+      "if": "message.payload.hasCreator",
+      "config": {
+        "resource": "persons",
+        "acceptVersions": [
+          "12"
+        ],
+        "idFromPayload": "xstmtvrsCreatedBy",
+        "target": "__createdBy",
+        "cache": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorCreatedBy",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Get Publisher": {
+      "class": "ethosProxyGet",
+      "if": "message.payload.hasPublisher",
+      "config": {
+        "resource": "persons",
+        "acceptVersions": [
+          "12"
+        ],
+        "idFromPayload": "xstmtvrsPublishedBy",
+        "target": "__publishedBy",
+        "cache": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorPublishedBy",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Get Archiver": {
+      "class": "ethosProxyGet",
+      "if": "message.payload.hasArchiver",
+      "config": {
+        "resource": "persons",
+        "acceptVersions": [
+          "12"
+        ],
+        "idFromPayload": "xstmtvrsArchivedBy",
+        "target": "__archivedBy",
+        "cache": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorArchivedBy",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Return name and Banner ID only": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform(message, context) {\r\n  const roles = ['__createdBy', '__publishedBy', '__archivedBy'];\r\n\r\n  roles.forEach(roleKey => {\r\n    const person = message.payload[roleKey];\r\n    if (person) {\r\n      const bannerId = person.credentials?.find(c => c.type === 'bannerId')?.value || null;\r\n      const fullName = person.names?.find(n => n.preference === 'preferred')?.fullName || null;\r\n\r\n      message.payload[roleKey] = {\r\n        bannerId,\r\n        fullName\r\n      };\r\n    }\r\n  });\r\n  \r\n  delete message.payload.xstmtvrsCreatedBy;\r\n  delete message.payload.xstmtvrsPublishedBy;\r\n  delete message.payload.xstmtvrsArchivedBy;\r\n\r\n  return message;\r\n}\r\n"
+      }
+    }
+  }
+}

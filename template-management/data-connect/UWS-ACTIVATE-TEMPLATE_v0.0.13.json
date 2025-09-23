@@ -1,0 +1,77 @@
+{
+  "name": "UWS-ACTIVATE-TEMPLATE",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    },
+    {
+      "name": "xstmtvrsTemplateId",
+      "type": "string",
+      "required": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Get Template Versions by Template ID",
+    "Check for any other active version",
+    "Create Put Body",
+    "Put Active Template Version"
+  ],
+  "segments": {
+    "Get Template Versions by Template ID": {
+      "class": "ethosProxyGetFilter",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "filter": "?criteria={\"xstmtvrsTemplateId\":{{context.xstmtvrsTemplateId}}}",
+        "payloadTargetPath": "__versions",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Check for any other active version": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  \n  // Remove current version from array\n  const newArray = message.payload.__versions.reduce((acc, version) => {\n    if (version.xstmtvrsVersId !== message.payload.payload.workingTemplateVersion.xstmtvrsVersId) {\n      acc.push(version);\n    }\n    return acc\n  }, [])\n  \n  // Check other versions for any active version\n  const hasActiveVersion = newArray.some(p => p.xstmtvrsIsActive === \"true\");\n  if (hasActiveVersion) {\n    throw new Error (\"Active version already!\")\n  }\n  const noActiveVersion = !hasActiveVersion;\n  \n  message.payload.__noActiveVersion = noActiveVersion;\n  return message;\n}\n"
+      }
+    },
+    "Create Put Body": {
+      "class": "JavaScriptTransform",
+      "if": "message.payload.__noActiveVersion",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  \n    const p = message.payload.payload.workingTemplateVersion;\n\n  // Put your code here.\n    const body = {\n    ...p,\n    xstmtvrsIsActive: \"true\"\n  }\n  \n  message.payload.body = body;\n  return message;\n}\n"
+      }
+    },
+    "Put Active Template Version": {
+      "class": "ethosProxyPut",
+      "if": "message.payload.__noActiveVersion",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "idFromPayload": "$.body.id",
+        "target": "__putActiveTemplateVersionResponse",
+        "bodyPath": "$.body",
+        "ignoreErrors": false,
+        "errorPath": "__errorPutActiveTemplateVersion",
+        "apiKey": "ethosApiKey",
+        "allowConcurrent": false
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+    "MEPIndicator": "N",
+    "customTableName": "xstmtmpl",
+    "customTableAPIName": "x-xstmtmpl",
+    "customTableDescription": "Templates",
+    "customTableSecurityObject": "API_X_XSTMTMPL",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "requiresAutoIncrement": "N",
+    "customTableColumns": [
+        {
+            "columnName": "xstmtmpl_template_id",
+            "attributeKeyColumn": "true",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "36",
+            "attributePrompt": "Template UUID",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtmpl_template_title",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "255",
+            "attributePrompt": "Template Title",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtmpl_template_description",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "512",
+            "attributePrompt": "Template Description",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtmpl_created_at_timestamp",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "numeric",
+            "attributeDataLength": "13",
+            "attributePrompt": "Created At Timestamp",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmtmpl_created_by",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "36",
+            "attributePrompt": "Created By Banner UUID",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        }
+    ]
+}

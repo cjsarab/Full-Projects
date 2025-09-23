@@ -1,0 +1,32 @@
+{
+  "name": "UWS-GET-TEMPLATES",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "GET"
+  },
+  "pipeline": [
+    "x-xstmtmpl"
+  ],
+  "segments": {
+    "x-xstmtmpl": {
+      "class": "ethosProxyGet",
+      "config": {
+        "resource": "x-xstmtmpl",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingTemplates",
+        "apiKey": "ethosApiKey"
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "UWS-DEACTIVATE-TEMPLATE",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Create Deactivate Body",
+    "Put Body"
+  ],
+  "segments": {
+    "Create Deactivate Body": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  const p = message.payload.payload.workingTemplateVersion;\n  // Check template is active\n  let body;\n  \n  if (p.xstmtvrsIsActive === \"true\") {\n    body = {\n      ...p,\n      xstmtvrsIsActive: \"false\"\n    }\n  }\n  \n  // Flip the string\n  // const body = {\n  //   ...p,\n  //   xstmtvrsIsActive: (p.xstmtvrsIsActive === \"true\") ? \"false\" : \"true\"\n  // }\n  if (body) {\n    message.payload.body = body\n  }\n  \n  return message;\n}\n"
+      }
+    },
+    "Put Body": {
+      "class": "ethosProxyPut",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "idFromPayload": "$.body.id",
+        "target": "__deactivateTemplateResponse",
+        "bodyPath": "$.body",
+        "ignoreErrors": false,
+        "errorPath": "__errorDeactivateTemplateResponse",
+        "apiKey": "ethosApiKey",
+        "allowConcurrent": false
+      }
+    }
+  }
+}

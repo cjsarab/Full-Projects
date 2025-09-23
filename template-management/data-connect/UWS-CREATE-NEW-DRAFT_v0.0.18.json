@@ -1,0 +1,59 @@
+{
+  "name": "UWS-CREATE-NEW-DRAFT",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Create New Draft Body",
+    "Put new Template Draft Version",
+    "Create new template draft version"
+  ],
+  "segments": {
+    "Create New Draft Body": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "code": "function transform(message, context) {\r\n  const p = message.payload.payload.workingTemplateVersion;\r\n  const versions = message.payload.payload.selectedTemplateVersions;\r\n  const newId = message.payload.payload.newId;\r\n  const userId = context.__user?.id;\r\n  const date = Date.now();\r\n  context.set('date', date);\r\n  \r\n  if (!p.xstmtvrsVersId || !userId || !p.xstmtvrsTemplateId) {\r\n    throw new Error(\"Something went wrong. Please try again.\");\r\n  };\r\n  \r\n  const hasDraft = versions.some(v => v.xstmtvrsStatusEnum === 'draft');\r\n  const hasNoDraft = !hasDraft;\r\n  \r\n  context.set('hasDraft', hasDraft);\r\n  context.set('hasNoDraft', hasNoDraft);\r\n  \r\n  const getNextVersionNumber = () => {\r\n    const versionNumbers = versions.map(v => v.xstmtvrsVersNumber);\r\n    return Math.max(...versionNumbers) + 1;\r\n  };\r\n  \r\n  let newTemplateDraftVersionPayload;\r\n\r\n  if (hasDraft) {\r\n    const originalDraft = versions.find(v => v.xstmtvrsStatusEnum === 'draft');\r\n    context.set('originalDraftId', originalDraft.id)\r\n    \r\n    newTemplateDraftVersionPayload = {   \r\n      id: originalDraft.id,\r\n      xstmtvrsVersId: originalDraft.xstmtvrsVersId,\r\n      xstmtvrsTemplateId: p.xstmtvrsTemplateId,\r\n      xstmtvrsVersNumber: originalDraft.xstmtvrsVersNumber,\r\n      xstmtvrsStatusEnum: \"draft\",\r\n      xstmtvrsIsActive: \"false\",\r\n      xstmtvrsRoles: \"[\\\"staff\\\", \\\"student\\\"]\",\r\n      xstmtvrsCreatedAt: context.get('date'),\r\n      xstmtvrsCreatedBy: userId,\r\n      xstmtvrsContent1: p.xstmtvrsContent1\r\n    };\r\n  } else {\r\n    newTemplateDraftVersionPayload = {   \r\n      id: \"00000000-0000-0000-0000-000000000000\",\r\n      xstmtvrsVersId: newId,\r\n      xstmtvrsTemplateId: p.xstmtvrsTemplateId,\r\n      xstmtvrsVersNumber: getNextVersionNumber(versions),\r\n      xstmtvrsStatusEnum: \"draft\",\r\n      xstmtvrsIsActive: \"false\",\r\n      xstmtvrsRoles: \"[\\\"staff\\\", \\\"student\\\"]\",\r\n      xstmtvrsCreatedAt: context.get('date'),\r\n      xstmtvrsCreatedBy: userId,\r\n      xstmtvrsContent1: p.xstmtvrsContent1\r\n    };\r\n  }\r\n  \r\n  // Add content if it exists\r\n  for (let i = 1; i <= 8; i++) {\r\n    const key = `xstmtvrsContent${i}`;\r\n    if (p[key] != null) {\r\n      newTemplateDraftVersionPayload[key] = p[key];\r\n    }\r\n  }\r\n  message.payload.__newTemplateDraftVersionPayload = newTemplateDraftVersionPayload;\r\n\r\n  return message;\r\n}\r\n"
+      }
+    },
+    "Put new Template Draft Version": {
+      "class": "ethosProxyPut",
+      "if": "context.hasDraft",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "idFromContext": "originalDraftId",
+        "target": "__newTemplateDraftVersionResponse",
+        "bodyPath": "__newTemplateDraftVersionPayload",
+        "ignoreErrors": false,
+        "errorPath": "__errorNewTemplateDraftVersion",
+        "apiKey": "ethosApiKey",
+        "allowConcurrent": false
+      }
+    },
+    "Create new template draft version": {
+      "class": "ethosProxyPost",
+      "if": "context.hasNoDraft",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "target": "__newTemplateDraftVersionResponse",
+        "bodyPath": "__newTemplateDraftVersionPayload",
+        "ignoreErrors": false,
+        "errorPath": "__errorNewTemplateDraftVersion",
+        "apiKey": "ethosApiKey"
+      }
+    }
+  }
+}

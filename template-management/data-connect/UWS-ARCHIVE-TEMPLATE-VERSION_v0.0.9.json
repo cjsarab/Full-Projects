@@ -1,0 +1,95 @@
+{
+  "name": "UWS-ARCHIVE-TEMPLATE-VERSION",
+  "parameters": [
+    {
+      "name": "ethosApiKey",
+      "type": "string",
+      "sensitive": true
+    }
+  ],
+  "apiDefinition": {
+    "authType": "userToken",
+    "httpVerb": "POST"
+  },
+  "pipeline": [
+    "Store Template and Versions IDs",
+    "Get Version",
+    "Get all Template Versions",
+    "Validate Template Version",
+    "Create PUT body",
+    "Archive Template"
+  ],
+  "segments": {
+    "Store Template and Versions IDs": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "code": "function transform (message, context) {\n  \n  const p = message.payload.payload;\n  \n  if (p.workingTemplateVersion.xstmtvrsStatusEnum != \"published\") {\n    throw new Error(\"Only published templates may be archived.\")\n  }\n  \n  if (\n    !p.workingTemplateVersion.id ||\n    !p.workingTemplateVersion.xstmtvrsTemplateId ||\n    !p.workingTemplateVersion.xstmtvrsVersId\n  ) {\n    throw new Error(\"An unexpected error occurred.\")\n  }\n\n  context.set('xstmtvrsTemplateId', p.workingTemplateVersion.xstmtvrsTemplateId)\n  context.set('versionId', p.workingTemplateVersion.id)\n  context.set('xstmtvrsVersId', p.workingTemplateVersion.xstmtvrsVersId)\n\n  message.payload.__context = context;\n  return message;\n}\n"
+      }
+    },
+    "Get Version": {
+      "class": "ethosProxyGet",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "acceptVersions": [
+          "1"
+        ],
+        "idFromContext": "versionId",
+        "target": "__version",
+        "cache": false,
+        "ignoreErrors": false,
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Get all Template Versions": {
+      "class": "ethosProxyGetFilter",
+      "description": "Get versions for specific template",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "filter": "?criteria={\"xstmtvrsTemplateId\":{{context.xstmtvrsTemplateId}}}",
+        "payloadTargetPath": "__templateVersions",
+        "acceptVersions": [
+          "1"
+        ],
+        "cache": false,
+        "queryByPost": false,
+        "ignoreErrors": false,
+        "errorPath": "__errorGettingTemplateVersions",
+        "apiKey": "ethosApiKey"
+      }
+    },
+    "Validate Template Version": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": true,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  \n  const version = message.payload.__version;\n  const versions = message.payload.__templateVersions;\n  if (version.xstmtvrsStatusEnum !== \"published\") {\n    throw new Error (\"Version is not published!\")\n  }\n  if (version.xstmtvrsIsActive !== \"false\") {\n    throw new Error (\"Version is active! Cannot be archived.\")\n  }\n  const publishedCount = versions.filter(v => v.xstmtvrsStatusEnum === \"published\").length;\n  if (publishedCount <= 1) {\n    throw new Error('Cannot archive only published template!');\n  }\n  \n  context.set('validToArchive', true)\n  \n  return message;\n}\n"
+      }
+    },
+    "Create PUT body": {
+      "class": "JavaScriptTransform",
+      "config": {
+        "pushUndefined": true,
+        "stopOnError": false,
+        "draft": false,
+        "code": "function transform (message, context) {\n  // Put your code here.\n  const date = Date.now();\n  context.set('date', date);\n  const userId = context.__user?.id;\n\n  let body;\n  \n  const version = message.payload.__version\n  \n  body = {\n    ...version,\n    xstmtvrsStatusEnum: \"archived\",\n    xstmtvrsArchivedAt: context.get('date'),\n    xstmtvrsArchivedBy: userId\n  }\n  \n  message.payload.body = body;\n  \n  return message;\n}\n"
+      }
+    },
+    "Archive Template": {
+      "class": "ethosProxyPut",
+      "config": {
+        "resource": "x-xstmtvrs",
+        "contentVersion": "1",
+        "acceptVersion": "1",
+        "idFromContext": "versionId",
+        "bodyPath": "$.body",
+        "ignoreErrors": false,
+        "errorPath": "__errorArchivingTemplate",
+        "apiKey": "ethosApiKey",
+        "allowConcurrent": false
+      }
+    }
+  }
+}

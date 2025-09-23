@@ -1,0 +1,47 @@
+{
+    "MEPIndicator": "N",
+    "customTableName": "xstmvrbl",
+    "customTableAPIName": "x-xstmvrbl",
+    "customTableDescription": "Variables",
+    "customTableSecurityObject": "API_X_XSTMVRBL",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "requiresAutoIncrement": "N",
+    "customTableColumns": [
+        {
+            "columnName": "xstmvrbl_variable_id",
+            "attributeKeyColumn": "true",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "36",
+            "attributePrompt": "Variable UUID",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmvrbl_variable_value",
+            "attributeKeyColumn": "true",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "255",
+            "attributePrompt": "Variable Value",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmvrbl_variable_label",
+            "attributeKeyColumn": "true",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "255",
+            "attributePrompt": "Variable Label",
+            "attributeRequired": true,
+            "attributeDisplay": "true"
+        },
+        {
+            "columnName": "xstmvrbl_variable_description",
+            "attributeKeyColumn": "false",
+            "attributeDataType": "varchar2",
+            "attributeDataLength": "255",
+            "attributePrompt": "Variable Description",
+            "attributeRequired": false,
+            "attributeDisplay": "true"
+        }
+    ]
+}

@@ -1,0 +1,66 @@
+{
+    "name": "UWS-CREATE-NEW-TEMPLATE",
+    "parameters": [
+        {
+            "name": "ethosApiKey",
+            "type": "string",
+            "sensitive": true
+        }
+    ],
+    "apiDefinition": {
+        "authType": "userToken",
+        "httpVerb": "POST"
+    },
+    "pipeline": [
+        "Create New Template Body",
+        "Create Template Initial Version Body",
+        "Create new template",
+        "Create new template version"
+    ],
+    "segments": {
+        "Create New Template Body": {
+            "class": "JavaScriptTransform",
+            "config": {
+                "pushUndefined": true,
+                "stopOnError": false,
+                "draft": false,
+                "code": "function transform(message, context) {\r\n  const p = message.payload.payload;\r\n  const date = Date.now();\r\n  context.set('date', date)\r\n  const userId = context.__user?.id;\r\n  \r\n  if (!p.xstmtmplTemplateTitle) {\r\n    throw new Error(\"Missing required field: title\");\r\n  };\r\n  \r\n  if (!p.xstmtmplTemplateId || !userId) {\r\n    throw new Error(\"Something went wrong. Please try again.\");\r\n  };\r\n\r\n  const newTemplatePayload = {\r\n    id: \"00000000-0000-0000-0000-000000000000\",\r\n    xstmtmplTemplateId: p.xstmtmplTemplateId,\r\n    xstmtmplTemplateTitle: p.xstmtmplTemplateTitle,\r\n    ...(p.xstmtmplTemplateDescription && { xstmtmplTemplateDescription: p.xstmtmplTemplateDescription }),\r\n    xstmtmplCreatedAtTimestamp: context.get('date'),\r\n    xstmtmplCreatedBy: userId\r\n  };\r\n  message.payload.__newTemplatePayload = newTemplatePayload;\r\n\r\n  return message;\r\n}\r\n"
+            }
+        },
+        "Create Template Initial Version Body": {
+            "class": "JavaScriptTransform",
+            "config": {
+                "pushUndefined": true,
+                "stopOnError": false,
+                "draft": false,
+                "code": "function transform(message, context) {\r\n  const p = message.payload.payload;\r\n  const userId = context.__user?.id;\r\n  \r\n  if (!p.xstmtmplTemplateTitle) {\r\n    throw new Error(\"Missing required field: title\");\r\n  };\r\n  \r\n  if (!p.xstmtvrsVersId || !userId || !p.xstmtmplTemplateId) {\r\n    throw new Error(\"Something went wrong. Please try again.\");\r\n  };\r\n\r\n  const newTemplateVersionPayload = {   \r\n    id: \"00000000-0000-0000-0000-000000000000\",\r\n    xstmtvrsVersId: p.xstmtvrsVersId,\r\n    xstmtvrsTemplateId: p.xstmtmplTemplateId,\r\n    xstmtvrsVersNumber: 1,\r\n    xstmtvrsStatusEnum: \"draft\",\r\n    xstmtvrsIsActive: \"false\",\r\n    xstmtvrsRoles: \"[\\\"staff\\\", \\\"student\\\"]\",\r\n    xstmtvrsCreatedAt: context.get('date'),\r\n    xstmtvrsCreatedBy: userId,\r\n    xstmtvrsContent1: p.xstmtvrsContent1\r\n  };\r\n  message.payload.__newTemplateVersionPayload = newTemplateVersionPayload;\r\n\r\n  return message;\r\n}\r\n"
+            }
+        },
+        "Create new template": {
+            "class": "ethosProxyPost",
+            "config": {
+                "resource": "x-xstmtmpl",
+                "contentVersion": "1",
+                "acceptVersion": "1",
+                "target": "__newTemplateResponse",
+                "bodyPath": "__newTemplatePayload",
+                "ignoreErrors": true,
+                "errorPath": "__newTemplateErrors",
+                "apiKey": "ethosApiKey"
+            }
+        },
+        "Create new template version": {
+            "class": "ethosProxyPost",
+            "config": {
+                "resource": "x-xstmtvrs",
+                "contentVersion": "1",
+                "acceptVersion": "1",
+                "target": "__newTemplateVersionResponse",
+                "bodyPath": "__newTemplateVersionPayload",
+                "ignoreErrors": false,
+                "errorPath": "__newTemplateVersionError",
+                "apiKey": "ethosApiKey"
+            }
+        }
+    }
+}

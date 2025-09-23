@@ -1,0 +1,63 @@
+{
+    "name": "UWS-GET-ACTIVE-TEMPLATES",
+    "parameters": [
+        {
+            "name": "ethosApiKey",
+            "type": "string",
+            "sensitive": true
+        }
+    ],
+    "apiDefinition": {
+        "authType": "userToken",
+        "httpVerb": "GET"
+    },
+    "pipeline": [
+        "Get Active Template Versions",
+        "For Each",
+        "Get Template Details",
+        "Reducer"
+    ],
+    "segments": {
+        "Get Active Template Versions": {
+            "class": "ethosProxyGetFilter",
+            "config": {
+                "resource": "x-xstmtvrs",
+                "filter": "?criteria={\"xstmtvrsStatusEnum\":\"published\",\"xstmtvrsIsActive\":\"true\"}",
+                "payloadTargetPath": "__activeTemplateVersions",
+                "acceptVersions": [
+                    "1"
+                ],
+                "cache": false,
+                "queryByPost": false,
+                "ignoreErrors": false
+            }
+        },
+        "For Each": {
+            "class": "forEach",
+            "config": {
+                "source": "payload.__activeTemplateVersions"
+            }
+        },
+        "Get Template Details": {
+            "class": "ethosProxyGetFilter",
+            "config": {
+                "resource": "x-xstmtmpl",
+                "filter": "?criteria={\"xstmtmplTemplateId\":{{message.payload.xstmtvrsTemplateId}}}",
+                "payloadTargetPath": "__templateDetails",
+                "acceptVersions": [
+                    "1"
+                ],
+                "cache": false,
+                "queryByPost": false,
+                "ignoreErrors": false,
+                "apiKey": "ethosApiKey"
+            }
+        },
+        "Reducer": {
+            "class": "reducer",
+            "config": {
+                "accumulator": "payload"
+            }
+        }
+    }
+}
