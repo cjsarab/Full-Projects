@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography } from '@ellucian/react-design-system/core';
+import { Typography, Card, CardContent } from '@ellucian/react-design-system/core';
 
 import { postPayloadToEthosPipeline } from '../services';
 import { useCardInfo, useData } from '@ellucian/experience-extension-utils';
@@ -70,9 +70,13 @@ const TemplateEditor = () => {
                     </Typography>
                 )
             ) : (
-                <Typography variant="body1" color="text.secondary">
-                    Select a template to begin editing.
-                </Typography>
+                <Card accent="primary" sx={{ minHeight: '400px' }}>
+                    <CardContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <Typography variant="h2" color="text.secondary">
+                            Select a template to begin editing.
+                        </Typography>
+                    </CardContent>
+                </Card>
             )}
         </>
 

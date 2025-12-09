@@ -7,42 +7,22 @@ import CustomButton from "../Button";
 
 import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
-import { postPayloadToEthosPipeline } from "../../services";
+import { putPayloadToEthosPipeline } from "../../services";
 import { pipelines } from "../../pipeline-config";
 
 
-const NewTemplateDialog = () => {
+const EditTemplateNameDialog = () => {
 
     const { authenticatedEthosFetch } = useData();
     const { cardId, cardPrefix } = useCardInfo();
-    const { newTemplateDialog: dialog } = useDialog();
-    const { selection: { handleSelectTemplate } } = useTemplate();
+    const { editTemplateNameDialog: dialog } = useDialog();
+    const { selection: { handleSelectTemplate, selectedTemplate } } = useTemplate();
 
     const { refresh: refreshTemplatesData } = useDataQuery({ resource: pipelines.getTemplates });
 
     const handleDialogAccept = async () => {
         const title = dialog?.inputs?.title?.trim() || "";
         const desc = dialog?.inputs?.description?.trim() || "";
-
-        const sampleHtml = `
-            <div>
-                <h1 style="margin-bottom: 0.5em; text-align: center;">${title}</h1>
-                <hr style="margin: 2em 0;" />
-
-                <h2>Overview</h2>
-                <p>
-                Use this template editor to create templates for letters and other documents.
-                </p>
-                <h2>Key Points</h2>
-                <ul>
-                <li>Supports <strong>rich text formatting</strong></li>
-                <li>Includes <em>headings, lists, and links</em></li>
-                <li>Fully customisable via the editor</li>
-                <li>Use the variables button in the toolbar to insert variables! ({x})</li>
-                </ul>
-            </div>
-        `;
-
 
         // Basic title validation
         if (!title) {
@@ -62,30 +42,45 @@ const NewTemplateDialog = () => {
 
         try {
             dialog.setIsLoading(true)
-            const res = await postPayloadToEthosPipeline(
+            const res = await putPayloadToEthosPipeline(
                 {
-                    "xstmtmplTemplateId": crypto.randomUUID(),
+                    "xstmtmplId": selectedTemplate?.id,
+                    "xstmtmplTemplateId": selectedTemplate?.xstmtmplTemplateId,
                     "xstmtmplTemplateTitle": title,
                     "xstmtmplTemplateDescription": desc,
-                    "xstmtvrsVersId": crypto.randomUUID(),
-                    "xstmtvrsContent1": sampleHtml
+                    "xstmtmplCreatedAtTimestamp": selectedTemplate?.xstmtmplCreatedAtTimestamp,
+                    "xstmtmplCreatedBy": selectedTemplate?.xstmtmplCreatedBy
                 },
                 authenticatedEthosFetch,
-                `${pipelines.createNewTemplate}?cardId=${cardId}&cardPrefix=${cardPrefix}`);
+                `${pipelines.editTemplateName}?cardId=${cardId}&cardPrefix=${cardPrefix}`);
             await refreshTemplatesData();
-            handleSelectTemplate(res?.__newTemplateResponse);
+            handleSelectTemplate(res?.__editedTemplateResponse);
             dialog.setShow(false);
             dialog.setIsLoading(false)
         } catch (error) {
-            dialog.setError(`Failed to create template: ${error.message}`);
+            dialog.setError(`Failed to edit template name/desc: ${error.message}`);
             dialog.setIsLoading(false)
         }
     };
 
+    console.log(selectedTemplate)
+
+    // useEffect(() => {
+    //     if (!dialog.show || !selectedTemplate) return;
+    //     dialog.handleInputChange('title', selectedTemplate?.xstmtmplTemplateTitle);
+    //     dialog.handleInputChange('description', selectedTemplate?.xstmtmplTemplateDescription);
+    // }, [dialog, selectedTemplate])
+    // useEffect(() => {
+    //     if (!show || !selectedTemplate) return;
+
+    //     handleInputChange('title', selectedTemplate.xstmtmplTemplateTitle || '');
+    //     handleInputChange('description', selectedTemplate.xstmtmplTemplateDescription || '');
+    // }, [selectedTemplate, show, handleInputChange]);
+
 
     return (
         <Dialog open={dialog.show} onClose={dialog.handleClose} maxWidth="lg">
-            <DialogTitle sx={{ mb: 2 }}>New Template</DialogTitle>
+            <DialogTitle sx={{ mb: 2 }}>Edit Template Name and Description</DialogTitle>
             <Alert
                 alertType="error"
                 open={dialog.error}
@@ -134,4 +129,4 @@ const NewTemplateDialog = () => {
     )
 }
 
-export default NewTemplateDialog;
+export default EditTemplateNameDialog;

@@ -1,0 +1,43 @@
+{
+    "name": "UWS-EDIT-TEMPLATE-NAME",
+    "parameters": [
+        {
+            "name": "ethosApiKey",
+            "type": "string",
+            "sensitive": true
+        }
+    ],
+    "apiDefinition": {
+        "authType": "userToken",
+        "httpVerb": "PUT"
+    },
+    "pipeline": [
+        "Create Template Name and Desc Body",
+        "Edit Template"
+    ],
+    "segments": {
+        "Create Template Name and Desc Body": {
+            "class": "JavaScriptTransform",
+            "config": {
+                "pushUndefined": true,
+                "stopOnError": false,
+                "code": "function transform(message, context) {\r\n  const p = message.payload.payload;\r\n  const userId = context.__user?.id;\r\n  const ethosId = p.xstmtmplId;\r\n  context.set('ethosId', ethosId);\r\n  \r\n  if (!p.xstmtmplTemplateTitle) {\r\n    throw new Error(\"Missing required field: title\");\r\n  };\r\n  \r\n  if (!p.xstmtmplTemplateId || !userId) {\r\n    throw new Error(\"Something went wrong. Please try again.\");\r\n  };\r\n  \r\n  if (!ethosId) {\r\n    throw new Error(\"Something went wrong. Please try again.\");\r\n  };\r\n\r\n  const editedTemplatePayload = {\r\n    xstmtmplTemplateId: p.xstmtmplTemplateId,\r\n    xstmtmplTemplateTitle: p.xstmtmplTemplateTitle,\r\n    ...(p.xstmtmplTemplateDescription && { xstmtmplTemplateDescription: p.xstmtmplTemplateDescription }),\r\n    xstmtmplCreatedAtTimestamp: p.xstmtmplCreatedAtTimestamp,\r\n    xstmtmplCreatedBy: p.xstmtmplCreatedBy\r\n  };\r\n  message.payload.__editedTemplatePayload = editedTemplatePayload;\r\n\r\n  return message;\r\n}\r\n"
+            }
+        },
+        "Edit Template": {
+            "class": "ethosProxyPut",
+            "config": {
+                "resource": "x-xstmtmpl",
+                "contentVersion": "1",
+                "acceptVersion": "1",
+                "idFromContext": "ethosId",
+                "target": "__editedTemplateResponse",
+                "bodyPath": "__editedTemplatePayload",
+                "ignoreErrors": false,
+                "errorPath": "__editedTemplateError",
+                "apiKey": "ethosApiKey",
+                "allowConcurrent": false
+            }
+        }
+    }
+}

@@ -1,69 +1,29 @@
-import React, { useState } from 'react';
-import { Box, TextField, InputAdornment, IconButton } from '@mui/material';
-import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import React from 'react';
+import { Box, Typography } from '@ellucian/react-design-system/core';
+import CustomButton from '../../components/Button';
 
 import { useTemplate } from '../../contexts/TemplateContext';
+import { useDialog } from '../../contexts/DialogContext';
 
-const
-    DraftTemplateTitle = () => {
+const DraftTemplateTitle = () => {
 
-        const { selection: { editableTemplate, setEditableTemplate } } = useTemplate();
-        const [isEditing, setIsEditing] = useState(false);
+    const { selection: { editableTemplate } } = useTemplate();
+    const { editTemplateNameDialog } = useDialog();
 
-        const handleSave = () => {
-            setIsEditing(false);
-        };
+    const title = editableTemplate?.xstmtmplTemplateTitle || '';
 
-        const handleEdit = () => {
-            setIsEditing(true);
-        };
-        const maxLength = 30
-
-        const handleChange = (e) => {
-            setEditableTemplate({
-                ...editableTemplate,
-                xstmtmplTemplateTitle: e.target.value,
-            });
-        };
-
-        const title = editableTemplate?.xstmtmplTemplateTitle || '';
-
-        return (
-            <Box mb={2} sx={{ maxWidth: 400 }}>
-                <TextField label="Template Title" placeholder="Enter template title" variant="outlined"
-                    value={title}
-                    // onChange={(e) => onTitleChange(e.target.value)}
-                    onChange={handleChange}
-                    fullWidth
-                    disabled={!isEditing}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton onClick={isEditing ? handleSave : handleEdit}>
-                                    {isEditing ? <SaveOutlinedIcon /> : <EditOutlinedIcon />}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
-                    inputProps={{
-                        maxLength: maxLength
-                    }}
-                />
-                {isEditing && (
-                    <Box
-                        sx={{
-                            textAlign: 'right',
-                            fontSize: '0.85rem',
-                            color: 'text.secondary',
-                            mt: 0.85
-                        }}
-                    >
-                        {title.length}/{maxLength} characters
-                    </Box>
-                )}
-            </Box>
-        );
-    };
+    return (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant='h3' sx={{ mr: 8 }}>
+                {title}
+            </Typography>
+            <CustomButton label="Edit"
+                onClick={editTemplateNameDialog.handleOpen}
+                startIcon="edit"
+                sx={{ maxHeight: '40px' }}
+            />
+        </Box>
+    );
+};
 
 export default DraftTemplateTitle;

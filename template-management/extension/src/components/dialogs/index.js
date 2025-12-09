@@ -4,3 +4,4 @@ export { default as DeleteDialog } from './DeleteDialog';
 export { default as NewDraftDialog } from './NewDraftDialog';
 export { default as NewTemplateDialog } from './NewTemplateDialog';
 export { default as PreviewDialog } from './PreviewDialog';
+export { default as EditTemplateNameDialog } from './EditTemplateNameDialog';

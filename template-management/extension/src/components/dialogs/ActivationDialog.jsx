@@ -1,11 +1,8 @@
 import React, { useEffect } from "react";
-import { Dialog, DialogTitle, DialogContent, Typography, Alert, DialogActions } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, Typography, Alert, DialogActions } from "@ellucian/react-design-system/core";
 import { useCardInfo, useData } from '@ellucian/experience-extension-utils';
 
 import CustomButton from "../Button";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
-import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 
 import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
@@ -45,8 +42,10 @@ const ActivationDialog = () => {
                 await handleSelectTemplate(selectedTemplate)
                 dialog.setIsLoading(false)
                 dialog.setShow(false)
+                dialog.setSnackbarMessage(`Successfully deactivated template '${templateTitle}'.`)
+                dialog.setSnackbarType('success')
             } catch (error) {
-                dialog.setError(`Failed to delete template: ${error.message}`);
+                dialog.setError(`Failed to deactivate template: ${error.message}`);
                 dialog.setIsLoading(false)
             }
         } else if (workingTemplateVersion?.xstmtvrsIsActive === "false") {
@@ -58,6 +57,8 @@ const ActivationDialog = () => {
                 await handleSelectTemplate(selectedTemplate)
                 dialog.setIsLoading(false)
                 dialog.setShow(false)
+                dialog.setSnackbarMessage(`Successfully activated template '${templateTitle}'.`)
+                dialog.setSnackbarType('success')
             } catch (error) {
                 dialog.setError(`Failed to activate template: ${error.message}`);
                 dialog.setIsLoading(false)
@@ -70,17 +71,18 @@ const ActivationDialog = () => {
     const templateTitle = selectedTemplate?.xstmtmplTemplateTitle || "No Template Selected";
 
     return (
-        <Dialog open={dialog.show} onClose={dialog.handleClose} maxWidth="lg">
+        <Dialog open={dialog.show} onClose={dialog.handleClose} maxWidth="md">
             <DialogTitle sx={{ mb: 2 }}>
                 {(workingTemplateVersion?.xstmtvrsIsActive === "true") ? 'Deactivate Template' : 'Activate Template'}
             </DialogTitle>
-
             <DialogContent sx={{ overflow: "visible", pt: 2 }}>
-                {/* <Typography variant="body1" sx={{ mb: 2 }} gutterBottom>
-            {(workingTemplateVersion?.xstmtvrsIsActive === "true")
-              ? `Are you sure you want to deactivate the template "${templateTitle}"?`
-              : `Are you sure you want to activate the template "${templateTitle}"?`}
-          </Typography> */}
+                <Alert alertType="error"
+                    open={dialog.error}
+                    onClose={dialog.handleCloseError}
+                >
+                    {dialog.error}
+                </Alert>
+
 
                 <Typography variant="body1" sx={{ mb: 2 }} gutterBottom>
                     {workingTemplateVersion?.xstmtvrsIsActive === "true" ? (
@@ -91,29 +93,20 @@ const ActivationDialog = () => {
                         `Are you sure you want to activate the template "${templateTitle}"?`
                     )}
                 </Typography>
-
-
-                {dialog.error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {dialog.error}
-                    </Alert>
-                )}
             </DialogContent>
 
             <DialogActions sx={{ justifyContent: 'space-between', p: 2 }}>
-                <CustomButton label="Return" color="info" variant="contained"
+                <CustomButton label="Return" color="secondary"
                     onClick={dialog.handleClose}
-                    startIcon={<ArrowBackIcon />}
+                    startIcon="arrow-left"
                 />
 
                 <CustomButton
                     label={(workingTemplateVersion?.xstmtvrsIsActive === "true") ? 'Deactivate' : 'Activate'}
-                    color={(workingTemplateVersion?.xstmtvrsIsActive === "true") ? 'error' : 'success'}
-                    variant="contained"
                     onClick={handleDialogAccept}
                     isLoading={dialog.isLoading}
                     disabled={activeVersion && workingTemplateVersion?.xstmtvrsIsActive === "false"}
-                    endIcon={(workingTemplateVersion?.xstmtvrsIsActive === "true") ? <BlockOutlinedIcon /> : <CheckOutlinedIcon />}
+                    startIcon={(workingTemplateVersion?.xstmtvrsIsActive === "true") ? "error" : "wifi"}
                 />
             </DialogActions>
         </Dialog>

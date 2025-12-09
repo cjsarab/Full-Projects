@@ -21,6 +21,7 @@ export const DialogProvider = ({ children }) => {
         const [warning, setWarning] = useState('');
         const [error, setError] = useState('');
         const [snackbarMessage, setSnackbarMessage] = useState('');
+        const [snackbarType, setSnackbarType] = useState('info')
         const [inputs, setInputs] = useState(initialInputs);
 
         const handleInputChange = (field, value) => {
@@ -30,8 +31,6 @@ export const DialogProvider = ({ children }) => {
             }))
         }
 
-        // const handleOpen = () => setShow(true);
-        // const handleClose = () => setShow(false);
         const handleOpen = () => {
             setError('');
             setWarning('');
@@ -41,6 +40,12 @@ export const DialogProvider = ({ children }) => {
             setError('');
             setWarning('');
             setShow(false);
+        };
+        const handleCloseError = () => {
+            setError('');
+        };
+        const handleCloseWarning = () => {
+            setWarning('');
         };
 
 
@@ -52,10 +57,14 @@ export const DialogProvider = ({ children }) => {
             setIsLoading,
             warning,
             setWarning,
+            handleCloseWarning,
             error,
             setError,
+            handleCloseError,
             snackbarMessage,
             setSnackbarMessage,
+            snackbarType,
+            setSnackbarType,
             inputs,
             setInputs,
             handleInputChange,
@@ -75,6 +84,7 @@ export const DialogProvider = ({ children }) => {
     const newDraftDialog = { ...useDialogState() };
     const activationDialog = { ...useDialogState() };
     const archiveDialog = { ...useDialogState() };
+    const editTemplateNameDialog = { ...useDialogState() };
 
     return (
         <DialogContext.Provider value={{
@@ -84,7 +94,8 @@ export const DialogProvider = ({ children }) => {
             deleteDialog,
             activationDialog,
             newDraftDialog,
-            archiveDialog
+            archiveDialog,
+            editTemplateNameDialog
 
         }}>
             {children}

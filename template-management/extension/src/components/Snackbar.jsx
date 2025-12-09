@@ -1,26 +1,23 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Snackbar, Alert } from '@mui/material';
+import { Snackbar } from '@ellucian/react-design-system/core';
 
-const CustomSnackbar = ({ message, onClose, severity }) => {
+const CustomSnackbar = ({ message, onClose, snackbarType }) => {
     return (
         <Snackbar
             open={!!message}
             onClose={onClose}
             anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-            severity={severity}
-        >
-            <Alert onClose={onClose} severity={severity} sx={{ width: '100%' }} variant="filled">
-                {message}
-            </Alert>
-        </Snackbar>
+            variant={snackbarType}
+            message={message}
+        />
     );
 };
 
 CustomSnackbar.propTypes = {
     message: PropTypes.string.isRequired,
     onClose: PropTypes.func.isRequired,
-    severity: PropTypes.oneOf(['success', 'info', 'warning', 'error']).isRequired
+    snackbarType: PropTypes.string.isRequired
 };
 
 

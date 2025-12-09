@@ -4,6 +4,7 @@ In extension directory run
 ```npm install```
 
 This application relies on a couple of external libraries:
+** MUI BEING REMOVED **
 
 [MUI Icons](https://mui.com/material-ui/material-icons/)
 [html2pdf](https://www.npmjs.com/package/html2pdf.js/v/0.9.0)

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Grid } from '@mui/material';
-import { Alert, Typography } from '@ellucian/react-design-system/core';
+// import { Grid } from '@mui/material';
+import { Alert, Typography, Grid } from '@ellucian/react-design-system/core';
 import TemplateEditor from '../features/TemplateEditor';
 import TemplatePreview from '../features/TemplatePreview';
 import TemplateSelector from '../features/TemplateSelector';
-import { ActivationDialog, ArchiveDialog, DeleteDialog, NewDraftDialog, NewTemplateDialog, PreviewDialog } from '../components/dialogs';
+import { ActivationDialog, ArchiveDialog, DeleteDialog, NewDraftDialog, NewTemplateDialog, PreviewDialog, EditTemplateNameDialog } from '../components/dialogs';
 import CustomSnackbar from '../components/Snackbar';
 
 import { useDialog } from '../contexts/DialogContext';
@@ -24,10 +24,12 @@ const HomePage = () => {
     return (
         <>
             <CustomSnackbar
+                snackbarType={deleteDialog.snackbarType}
                 message={deleteDialog.snackbarMessage}
                 onClose={() => deleteDialog.setSnackbarMessage('')}
             />
             <CustomSnackbar
+                snackbarType={activationDialog.snackbarType}
                 message={activationDialog.snackbarMessage}
                 onClose={() => activationDialog.setSnackbarMessage('')}
             />
@@ -40,12 +42,12 @@ const HomePage = () => {
                     <Typography variant="body1"><strong>Status Code:</strong> {templatesDataError?.statusCode || "N/A"}</Typography>
                     <Typography variant="body1"><strong>Message:</strong> {templatesDataError?.message || "Unknown error"}</Typography>
                 </Alert>
-                <Grid item md={3} sx={{ overflowY: 'auto', border: '1px solid #ccc', p: 2 }}>
+                <Grid item md={3} sx={{ overflowY: 'auto' }}>
                     <TemplateSelector />
                 </Grid>
 
                 <Grid item md={9} container direction="column" >
-                    <Grid item sx={{ border: '1px solid #ccc', borderLeft: 'none', p: 2 }}>
+                    <Grid item sx={{ p: 2 }}>
                         {previewDialog.isInPreviewMode ? (
                             <TemplatePreview />
                         ) : (
@@ -65,6 +67,7 @@ const HomePage = () => {
             <NewDraftDialog />
             <ActivationDialog />
             <ArchiveDialog />
+            <EditTemplateNameDialog />
         </>
     );
 };

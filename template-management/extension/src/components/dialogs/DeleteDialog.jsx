@@ -1,10 +1,8 @@
 import React, { useEffect } from "react";
 
-import { Dialog, DialogTitle, DialogContent, Typography, Alert, DialogActions } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, Typography, Alert, DialogActions } from "@ellucian/react-design-system/core";
 import { useCardInfo, useData } from '@ellucian/experience-extension-utils';
 import CustomButton from "../Button";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
@@ -18,7 +16,7 @@ const DeleteDialog = () => {
     const { authenticatedEthosFetch } = useData();
     const { cardId, cardPrefix } = useCardInfo();
     const { deleteDialog: dialog } = useDialog();
-    const { selection: { selectedTemplate, selectedTemplateVersions, handleSelectTemplate }, data } = useTemplate();
+    const { selection: { selectedTemplate, selectedTemplateVersions, handleSelectTemplate, setWorkingTemplateVersion }, data } = useTemplate();
 
 
     useEffect(() => {
@@ -51,10 +49,11 @@ const DeleteDialog = () => {
             )
             await data.refresh()
             handleSelectTemplate(null)
-            // setWorkingTemplateVersion(null)
+            setWorkingTemplateVersion(null)
             dialog.setIsLoading(false)
             dialog.setShow(false)
             dialog.setSnackbarMessage(`Successfully deleted draft '${templateTitle}'.`)
+            dialog.setSnackbarType('success')
         } catch (error) {
             dialog.setError(`Failed to delete template: ${error.message}`);
             dialog.setIsLoading(false)
@@ -65,31 +64,35 @@ const DeleteDialog = () => {
 
     return (
         <Dialog open={dialog.show} onClose={dialog.handleClose} maxWidth="lg">
-            <DialogTitle sx={{ mb: 2 }}>Delete Template</DialogTitle>
+            <DialogTitle sx={{ mb: 2 }}>Delete Template Draft</DialogTitle>
             <DialogContent sx={{ overflow: "visible", pt: 2 }}>
+                <Alert
+                    alertType="error"
+                    open={dialog.error}
+                    onClose={dialog.handleCloseError}
+                >
+                    {dialog.error}
+                </Alert>
+                <Alert
+                    alertType="warning"
+                    open={dialog.warning}
+                    onClose={dialog.handleCloseWarning}
+                >
+                    {dialog.warning}
+                </Alert>
                 <Typography variant="body1" sx={{ mb: 2 }} gutterBottom>
                     Warning! This action will permanently delete the draft {`"${templateTitle}"`}. Are you sure you want to proceed?
                 </Typography>
-                {dialog.error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {dialog.error}
-                    </Alert>
-                )}
-                {dialog.warning && (
-                    <Alert severity="warning" sx={{ mb: 2 }}>
-                        {dialog.warning}
-                    </Alert>
-                )}
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'space-between', p: 2 }}>
-                <CustomButton label="Return" color="info" variant="contained"
+                <CustomButton label="Return" color="secondary"
                     onClick={() => dialog.handleClose()}
-                    startIcon={<ArrowBackIcon />}
+                    startIcon="arrow-left"
                 />
-                <CustomButton label="Delete" color="error" variant="contained"
+                <CustomButton label="Delete"
                     isLoading={dialog.isLoading}
                     onClick={() => handleDialogAccept()}
-                    endIcon={<DeleteOutlineIcon />}
+                    startIcon="trash"
                 />
             </DialogActions>
         </Dialog>

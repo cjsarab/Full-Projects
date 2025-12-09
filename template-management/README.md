@@ -3,7 +3,7 @@ Template Management Extension
 </h1>
 
 ## About
-<img src="docs/assets/wysiwyg.png" width="800">
+<img src="docs/assets/template_management_overview.png" width="800">
 
 This extension allows administrative users to create and maintain templates for the purposes of generating status letters, i.e., Bank or Council Tax Status Letters.
 The templates are created using the Ellucian [Rich Text Editor](https://path-designsystem.elluciancloud.com/#/components/RichTextEditor) component which allows functional staff to create templates in whichever style they choose. The [custom-table-configurations](https://resources.elluciancloud.com/bundle/banner_exten_acn_use/page/c_create_custom_table_api.html) api is used to create tables in which to store the custom templates.

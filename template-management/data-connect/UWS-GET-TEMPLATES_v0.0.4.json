@@ -24,7 +24,6 @@
         ],
         "cache": false,
         "ignoreErrors": false,
-        "errorPath": "__errorGettingTemplates",
         "apiKey": "ethosApiKey"
       }
     }

@@ -1,17 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@mui/material';
-import { CircularProgress } from '@ellucian/react-design-system/core';
 
-const CustomButton = ({ label, color, variant, onClick, startIcon, endIcon, disabled, isLoading }) => {
+import { Icon } from '@ellucian/ds-icons/lib';
+
+import { Button, CircularProgress } from '@ellucian/react-design-system/core';
+
+const CustomButton = ({ label, color, variant, onClick, startIcon, endIcon, disabled, isLoading, sx = {} }) => {
     return (
         <Button variant={variant} color={color} onClick={onClick}
-            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : startIcon}
-            endIcon={!isLoading ? endIcon : null}
+            // startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : startIcon}
+            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : <Icon name={startIcon} />}
+            endIcon={endIcon ? <Icon name={endIcon} /> : null}
             disabled={disabled || isLoading}
+            sx={sx}
         >
             {label}
-        </Button>
+        </Button >
     );
 }
 
@@ -23,7 +27,8 @@ CustomButton.propTypes = {
     startIcon: PropTypes.node,
     endIcon: PropTypes.node,
     disabled: PropTypes.bool,
-    isLoading: PropTypes.bool
+    isLoading: PropTypes.bool,
+    sx: PropTypes.object,
 };
 
 

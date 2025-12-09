@@ -1,6 +1,6 @@
 {
     "name": "template-management",
-    "version": "1.0.15",
+    "version": "1.1.3",
     "description": "Allows administrative staff to manage templates for various letters and allows students to download them.",
     "main": "index.js",
     "license": "MIT",
@@ -18,7 +18,6 @@
         "@ellucian/experience-extension-extras": "github:ellucian-developer/experience-extension-extras",
         "@ellucian/experience-extension-utils": "https://cdn.elluciancloud.com/assets/SDK/utils/1.0.0/ellucian-experience-extension-utils-1.0.0.tgz",
         "@ellucian/react-design-system": "https://cdn.elluciancloud.com/assets/EDS2/7.18.1/umd/path_design_system.tgz",
-        "@mui/icons-material": "^5.18.0",
         "html2pdf.js": "^0.10.3",
         "prop-types": "15.7.2",
         "react": "17.0.2",

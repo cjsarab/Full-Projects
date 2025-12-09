@@ -6,6 +6,7 @@ export const pipelines = {
     deactivateTemplate: `UWS-DEACTIVATE-TEMPLATE`,
     deleteDraft: `UWS-DELETE-DRAFT`,
     downloadLetter: `UWS-DOWNLOAD-LETTER`,
+    editTemplateName: `UWS-EDIT-TEMPLATE-NAME`,
     getActiveTemplates: `UWS-GET-ACTIVE-TEMPLATES`,
     getAuthorMetadata: `UWS-GET-AUTHOR-METADATA`,
     getTemplateVersions: `UWS-GET-TEMPLATE-VERSIONS`,

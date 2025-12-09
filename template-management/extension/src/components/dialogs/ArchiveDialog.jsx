@@ -1,10 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 
-import { Dialog, DialogTitle, DialogContent, Typography, Alert, DialogActions } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, Alert, DialogActions } from "@ellucian/react-design-system/core";
 import { useCardInfo, useData } from '@ellucian/experience-extension-utils';
 import CustomButton from "../Button";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
@@ -19,6 +17,10 @@ const ArchiveDialog = () => {
     const { cardId, cardPrefix } = useCardInfo();
     const { archiveDialog: dialog } = useDialog();
     const { selection: { selectedTemplate, selectedTemplateVersions, setWorkingTemplateVersion, workingTemplateVersion }, data } = useTemplate();
+
+    useEffect(() => {
+        dialog.setWarning('Warning! Once archived, a published version can not be retrieved! Are you sure you want to proceed?');
+    }, [dialog]);
 
     const handleDialogAccept = async () => {
         if (!selectedTemplate) {
@@ -66,32 +68,34 @@ const ArchiveDialog = () => {
     const templateTitle = selectedTemplate?.xstmtmplTemplateTitle || "No Template Selected";
 
     return (
-        <Dialog open={dialog.show} onClose={dialog.handleClose} maxWidth="lg">
+        <Dialog open={dialog.show} onClose={dialog.handleClose} maxWidth="md">
             <DialogTitle sx={{ mb: 2 }}>Archive Template</DialogTitle>
-            <DialogContent sx={{ overflow: "visible", pt: 2 }}>
-                <Typography variant="body1" sx={{ mb: 2 }} gutterBottom>
-                    Warning! Once archived, a published version can not be retrieved! Are you sure you want to proceed?
-                </Typography>
-                {dialog.error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {dialog.error}
-                    </Alert>
-                )}
-                {dialog.warning && (
-                    <Alert severity="warning" sx={{ mb: 2 }}>
-                        {dialog.warning}
-                    </Alert>
-                )}
+            <DialogContent sx={{ pt: 2 }}>
+                <Alert
+                    alertType="error"
+                    open={dialog.error}
+                    onClose={dialog.handleCloseError}
+                >
+                    {dialog.error}
+                </Alert>
+                <Alert
+                    alertType="warning"
+                    open={dialog.warning}
+                    onClose={dialog.handleCloseWarning}
+                    userDismissable={false}
+                >
+                    {dialog.warning}
+                </Alert>
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'space-between', p: 2 }}>
-                <CustomButton label="Return" color="info" variant="contained"
+                <CustomButton label="Return" color="secondary"
                     onClick={() => dialog.handleClose()}
-                    startIcon={<ArrowBackIcon />}
+                    startIcon="arrow-left"
                 />
-                <CustomButton label="Archive" color="error" variant="contained"
+                <CustomButton label="Archive"
                     isLoading={dialog.isLoading}
                     onClick={() => handleDialogAccept()}
-                    endIcon={<DeleteOutlineIcon />}
+                    startIcon="trash"
                 />
             </DialogActions>
         </Dialog>

@@ -1,6 +1,5 @@
 import html2pdf from 'html2pdf.js';
 
-
 const getTemplateName = (template) => {
     if (template.__templateDetails) {
         return template.__templateDetails[0].xstmtmplTemplateTitle

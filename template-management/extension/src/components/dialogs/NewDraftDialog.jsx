@@ -1,15 +1,12 @@
 import React, { useEffect } from "react";
-
-import { Dialog, DialogTitle, DialogContent, Typography, Alert, DialogActions } from "@mui/material";
 import { useCardInfo, useData } from '@ellucian/experience-extension-utils';
+
+import { Dialog, DialogTitle, DialogContent, Typography, Alert, DialogActions } from "@ellucian/react-design-system/core";
 import CustomButton from "../Button";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import NoteAddOutlinedIcon from '@mui/icons-material/NoteAddOutlined';
 
 import { useDialog } from "../../contexts/DialogContext";
 import { useTemplate } from "../../contexts/TemplateContext";
 import { postPayloadToEthosPipeline } from "../../services";
-
 import { pipelines } from "../../pipeline-config";
 
 
@@ -65,37 +62,37 @@ const NewDraftDialog = () => {
     const versionNumber = workingTemplateVersion?.xstmtvrsVersNumber || "No Version Selected";
 
     return (
-        <Dialog open={dialog.show} onClose={dialog.handleClose} maxWidth="lg">
+        <Dialog open={dialog.show} onClose={dialog.handleClose} maxWidth="md">
             <DialogTitle sx={{ mb: 2 }}>Create New Draft</DialogTitle>
             <DialogContent sx={{ overflow: "visible", pt: 2 }}>
+                <Alert
+                    alertType="error"
+                    open={dialog.error}
+                    onClose={dialog.handleCloseError}
+                >
+                    {dialog.error}
+                </Alert>
+                <Alert
+                    alertType="warning"
+                    open={dialog.warning}
+                    onClose={dialog.handleCloseWarning}
+                    userDismissable={false}
+                >
+                    {dialog.warning}
+                </Alert>
                 {!dialog.warning && (
                     <Typography variant="body1" sx={{ mb: 2 }} gutterBottom>
                         This action will create a new draft of {`"${templateTitle}"`} based on version {versionNumber}.
                     </Typography>
                 )}
-                {dialog.error && (
-                    <Alert severity="error" sx={{ mb: 2 }}>
-                        {dialog.error}
-                    </Alert>
-                )}
-                {dialog.warning && (
-                    <Alert severity="warning" sx={{ mb: 2 }}>
-                        {dialog.warning}
-                    </Alert>
-                )}
             </DialogContent>
             <DialogActions sx={{ justifyContent: 'space-between', p: 2 }}>
-                <CustomButton label="Return" color="error" variant="contained"
-                    onClick={() => dialog.handleClose()}
-                    startIcon={<ArrowBackIcon />}
-                />
+                <CustomButton label="Return" color="secondary" onClick={() => dialog.handleClose()} startIcon="arrow-left" />
                 <CustomButton
                     label="New Draft"
-                    color="info"
-                    variant="contained"
                     isLoading={dialog.isLoading}
                     onClick={() => handleDialogAccept()}
-                    endIcon={<NoteAddOutlinedIcon />}
+                    startIcon="file-plus"
                 />
             </DialogActions>
         </Dialog>
